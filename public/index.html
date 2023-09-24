@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arduino Web Control</title>
+</head>
+<body>
+  <h1>Control LED</h1>
+  <p>Sekarang lampu sedang: <span id="lamp-status">Tidak Diketahui</span></p>
+  <button id="toggle-btn" onclick="toggleLED()">Toggle LED</button>
+  <div id="server-status">Server.js: <span id="server-status-text">Menunggu Koneksi</span></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    socket.on('connect', () => {
+      document.getElementById('server-status-text').textContent = 'Terhubung';
+    });
+
+    socket.on('disconnect', () => {
+      document.getElementById('server-status-text').textContent = 'Terputus';
+    });
+
+    socket.on('result', (message) => {
+      document.getElementById('lamp-status').textContent = message;
+    });
+
+    function toggleLED() {
+      const btn = document.getElementById('toggle-btn');
+      const lampStatus = document.getElementById('lamp-status');
+      
+      if (btn.textContent === 'Toggle LED') {
+        socket.emit('toggle', '1');
+        btn.textContent = 'Matikan LED';
+        lampStatus.textContent = 'Sekarang lampu sedang: ON';
+      } else {
+        socket.emit('toggle', '0');
+        btn.textContent = 'Nyalakan LED';
+        lampStatus.textContent = 'Sekarang lampu sedang: OFF';
+      }
+    }
+  </script>
+</body>
+</html>
